@@ -25,4 +25,8 @@ public class Patient {
     @ToString.Exclude
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
 }

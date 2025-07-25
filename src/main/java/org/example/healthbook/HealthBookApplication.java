@@ -24,14 +24,14 @@ public class HealthBookApplication {
         return args -> {
 
             // Ролі
-            if (roleRepository.findById("ROLE_PATIENT").isEmpty()) {
-                roleRepository.save(new Role("ROLE_PATIENT"));
+            if (roleRepository.findById("PATIENT").isEmpty()) {
+                roleRepository.save(new Role("PATIENT"));
             }
-            if (roleRepository.findById("ROLE_DOCTOR").isEmpty()) {
-                roleRepository.save(new Role("ROLE_DOCTOR"));
+            if (roleRepository.findById("DOCTOR").isEmpty()) {
+                roleRepository.save(new Role("DOCTOR"));
             }
-            if (roleRepository.findById("ROLE_ADMIN").isEmpty()) {
-                roleRepository.save(new Role("ROLE_ADMIN"));
+            if (roleRepository.findById("ADMIN").isEmpty()) {
+                roleRepository.save(new Role("ADMIN"));
             }
 
             // Адмін
@@ -39,7 +39,7 @@ public class HealthBookApplication {
                 User admin = new User();
                 admin.setUsername("admin");
                 admin.setPassword(encoder.encode("admin123"));
-                admin.setRoles(Collections.singleton(roleRepository.findById("ROLE_ADMIN").get()));
+                admin.setRoles(Collections.singleton(roleRepository.findById("ADMIN").get()));
                 userRepository.save(admin);
             }
         };
@@ -53,7 +53,6 @@ public class HealthBookApplication {
     ) {
         return args -> {
 
-            // Спеціалізації
             Specialization endoskopia = specializationRepository.findByName("Ендоскопія")
                     .orElseGet(() -> specializationRepository.save(new Specialization("Ендоскопія")));
             Specialization hirurgia = specializationRepository.findByName("Хірургія")
@@ -85,7 +84,6 @@ public class HealthBookApplication {
 
                 doctorRepository.saveAll(doctors);
 
-                // Додаємо розклад для кожного лікаря
                 for (Doctor doc : doctors) {
                     scheduleRepository.saveAll(List.of(
 

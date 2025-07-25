@@ -1,17 +1,32 @@
 package org.example.healthbook.dto;
 
 import lombok.Data;
+import org.example.healthbook.model.AppointmentRequest;
 
 @Data
 public class AppointmentRequestDTO {
-//    private String name;
-//    private String phone;
 
-    //for AdminPatientsPage
     private Long doctorId;
-    private String date;     // у форматі "yyyy-MM-dd"
-    private String time;     // "HH:mm"
-    private String fullName; // 🔸 потрібне для створення User/Patient
-    private String phone;    // 🔸 ключ для пошуку User
+    private String doctorName;
+    private String date;
+    private String time;
+    private String fullName;
+    private String phone;
     private String note;
+    private Long id;
+    private String status;
+
+    public static AppointmentRequestDTO fromEntity(AppointmentRequest request) {
+        AppointmentRequestDTO dto = new AppointmentRequestDTO();
+        dto.setId(request.getId());
+        dto.setFullName(request.getFullName());
+        dto.setPhone(request.getPhone());
+        dto.setDoctorId(request.getDoctor().getId());
+        dto.setDoctorName(request.getDoctor() != null ? request.getDoctor().getFullName() : null);
+        dto.setDate(request.getDate().toString());
+        dto.setTime(request.getTime().toString());
+        dto.setNote(request.getNote());
+        dto.setStatus(request.getStatus().name());
+        return dto;
+    }
 }

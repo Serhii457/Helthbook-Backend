@@ -2,6 +2,7 @@ package org.example.healthbook.service;
 
 import org.example.healthbook.dto.PatientDTO;
 import org.example.healthbook.model.Patient;
+import org.example.healthbook.model.Role;
 import org.example.healthbook.model.User;
 import org.example.healthbook.repository.AppointmentRequestRepository;
 import org.example.healthbook.repository.PatientRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,11 +39,16 @@ public class PatientService {
         this.appointmentRequestRepository = appointmentRequestRepository;
     }
 
-    public List<PatientDTO> getAllPatients() {
-        return patientRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+//    public List<PatientDTO> getAllPatients() {
+//        return patientRepository.findAll().stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
+
+    public List<Patient> getAllPatients() {
+        return patientRepository.findAll();
     }
+
 
     public PatientDTO getPatientById(Long id) {
         Patient patient = patientRepository.findById(id)
@@ -84,37 +91,65 @@ public class PatientService {
 
     @Transactional
     public Patient findOrCreatePatient(String fullName, String phone) {
-        User user = userRepository.findByPhone(phone).orElse(null);
-
-        if (user == null) {
-            System.out.println("Користувача не знайдено. Створюємо нового...");
-            user = new User();
-            user.setUsername("anon_" + UUID.randomUUID());
-            user.setPassword(passwordEncoder.encode("patient123"));
-            user.setFullName(fullName);
-            user.setPhone(phone);
-            user.setRoles(Set.of(roleRepository.findById("ROLE_PATIENT")
-                    .orElseThrow(() -> new RuntimeException("Роль ROLE_PATIENT не знайдена"))));
-            user = userRepository.save(user);
-        } else {
-            System.out.println("Користувача знайдено: user.id = " + user.getId());
+        Optional<Patient> existingPatient = patientRepository.findByPhone(phone);
+        if (existingPatient.isPresent()) {
+            return existingPatient.get();
         }
 
-        Patient patient = patientRepository.findByUser(user).orElse(null);
+        // Якщо User не існує — створюємо
+        Role role = roleRepository.findByName("ROLE_PATIENT")
+                .orElseThrow(() -> new RuntimeException("Роль не знайдена"));
+        Optional<User> existingUser = userRepository.findByPhone(phone);
+        User user = existingUser.orElseGet(() -> {
+            User newUser = new User();
+            newUser.setFullName(fullName);
+            newUser.setPhone(phone);
+            newUser.setUsername(UUID.randomUUID().toString());
+            newUser.setPassword(UUID.randomUUID().toString()); // Не входить до системи
+            newUser.setRoles(Set.of(role));
+            return userRepository.save(newUser);
+        });
 
-        if (patient == null) {
-            System.out.println("Пацієнта не знайдено. Створюємо нового...");
-            patient = new Patient();
-            patient.setUser(user);
-            patient.setFullName(fullName);
-            patient.setPhone(phone);
-            patient = patientRepository.save(patient);
-            patientRepository.flush();
-        } else {
-            System.out.println("Пацієнта знайдено: patient.id = " + patient.getId());
-        }
-
-        return patient;
+        // Створюємо Patient
+        Patient patient = new Patient();
+        patient.setFullName(fullName);
+        patient.setPhone(phone);
+        patient.setUser(user);
+        return patientRepository.save(patient);
     }
+
+//    public Patient findOrCreatePatient(String fullName, String phone) {
+//        User user = userRepository.findByPhone(phone).orElse(null);
+//
+//        if (user == null) {
+//            System.out.println("Користувача не знайдено. Створюємо нового...");
+//            user = new User();
+//            user.setUsername("anon_" + UUID.randomUUID());
+//            user.setPassword(passwordEncoder.encode("patient123"));
+//            user.setFullName(fullName);
+//            user.setPhone(phone);
+//            user.setRoles(Set.of(roleRepository.findByName("ROLE_PATIENT")  //было findById
+//                    .orElseThrow(() -> new RuntimeException("Роль ROLE_PATIENT не знайдена"))));
+//            user = userRepository.save(user);
+//        } else {
+//            System.out.println("Користувача знайдено: user.id = " + user.getId());
+//        }
+//
+//        Patient patient = patientRepository.findByUser(user).orElse(null);
+//
+//        if (patient == null) {
+//            System.out.println("Пацієнта не знайдено. Створюємо нового...");
+//            patient = new Patient();
+//            patient.setUser(user);
+//            patient.setFullName(fullName);
+//            patient.setPhone(phone);
+//            patient = patientRepository.save(patient);
+//            patientRepository.flush();
+//        } else {
+//            System.out.println("Пацієнта знайдено: patient.id = " + patient.getId());
+//        }
+//
+//        return patient;
+//    }
 
 }

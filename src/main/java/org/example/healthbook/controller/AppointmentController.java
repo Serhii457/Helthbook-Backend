@@ -6,9 +6,9 @@ import org.example.healthbook.dto.AppointmentRequestDTO;
 import org.example.healthbook.model.*;
 import org.example.healthbook.repository.AppointmentRepository;
 import org.example.healthbook.repository.DoctorRepository;
-import org.example.healthbook.repository.PatientRepository;
 import org.example.healthbook.service.AppointmentRequestService;
 import org.example.healthbook.service.AppointmentService;
+import org.example.healthbook.service.PatientService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,22 +29,22 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final AppointmentRequestService appointmentRequestService;
     private final DoctorRepository doctorRepository;
-    private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
+    private final PatientService patientService;
 
     @PostMapping("/public")
     public ResponseEntity<String> requestAppointment(@RequestBody AppointmentRequestDTO dto) {
         AppointmentRequest request = new AppointmentRequest();
         request.setFullName(dto.getFullName());
         request.setPhone(dto.getPhone());
-        appointmentRequestService.save(request);
+        appointmentRequestService.createAppointmentRequest(dto);
 
         return ResponseEntity.ok("Дякуємо! Ми зателефонуємо вам найближчим часом.");
     }
 
-    @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<AppointmentDTO> getAll() {
+    public List<AppointmentDTO> getAllAppointments() {
         return appointmentService.getAllAppointments();
     }
 
@@ -95,13 +95,13 @@ public class AppointmentController {
         return appointmentService.getAppointmentsForDoctor(principal.getName());
     }
 
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
     @PostMapping("/appointments")
     public AppointmentDTO createAppointment(@RequestBody AppointmentDTO dto) {
+        Patient patient = patientService.findOrCreatePatient(dto.getFullName(), dto.getPhone());
+
         Doctor doctor = doctorRepository.findById(dto.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Лікар не знайдений"));
-
-        Patient patient = patientRepository.findById(dto.getPatientId())
-                .orElseThrow(() -> new RuntimeException("Пацієнт не знайдений"));
 
         LocalDate date = LocalDate.parse(dto.getDate());
         LocalTime time = LocalTime.parse(dto.getTime());
@@ -117,7 +117,14 @@ public class AppointmentController {
         appointment.setPatient(patient);
         appointment.setStatus(AppointmentStatus.SCHEDULED);
 
-        appointmentRepository.save(appointment);
+        appointment = appointmentRepository.save(appointment);
+
+        dto.setId(appointment.getId());
+        dto.setDoctorName(doctor.getFullName());
+        dto.setPatientId(patient.getId());
+        dto.setPatientName(patient.getFullName());
+        dto.setStatus(appointment.getStatus().name());
+
         return dto;
     }
 }

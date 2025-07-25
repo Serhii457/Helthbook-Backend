@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.healthbook.dto.PatientDTO;
 import org.example.healthbook.model.Patient;
 import org.example.healthbook.service.PatientService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +19,17 @@ public class PatientController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<PatientDTO> getAllPatients() {
-        return patientService.getAllPatients();
+    public ResponseEntity<List<PatientDTO>> getAllPatients() {
+        List<PatientDTO> patients = patientService.getAllPatients()
+                .stream()
+                .map(p -> new PatientDTO(
+                        p.getId(),
+                        p.getFullName(),
+                        p.getPhone(),
+                        p.getUser() != null ? p.getUser().getId() : null
+                ))
+                .toList();
+        return ResponseEntity.ok(patients);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -45,5 +55,4 @@ public class PatientController {
     public void deletePatient(@PathVariable Long id) {
         patientService.deletePatient(id);
     }
-
 }

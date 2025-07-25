@@ -24,7 +24,6 @@ public class AppointmentRequest {
     @Column(nullable = false)
     private String phone;
 
-    //для админ-пациент
     private LocalDate date;
     private LocalTime time;
 
