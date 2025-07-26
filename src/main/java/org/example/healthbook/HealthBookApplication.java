@@ -68,18 +68,18 @@ public class HealthBookApplication {
 
             if (doctorRepository.count() == 0) {
                 List<Doctor> doctors = List.of(
-                        new Doctor("Іванна Петрова", "+380501111111", plastic, null, "/images/doctors/doc1.jpg"),
-                        new Doctor("Олена Іваненко", "+380502222222", endoskopia, null, "/images/doctors/doc2.jpg"),
-                        new Doctor("Андрій Шевченко", "+380503333333", proktologia, null, "/images/doctors/doc3.jpg"),
-                        new Doctor("Марія Сидоренко", "+380504444444", hirurgia, null, "/images/doctors/doc4.jpg"),
-                        new Doctor("Віктор Коваль", "+380505555555", sudinnaHir, null, "/images/doctors/doc5.jpg"),
-                        new Doctor("Оксана Дорош", "+380506666666", proktologia, null, "/images/doctors/doc6.jpeg"),
-                        new Doctor("Сергій Кравченко", "+380507777777", hirurgia, null, "/images/doctors/doc7.jpg"),
-                        new Doctor("Тетяна Лисенко", "+380508888888", uzd, null, "/images/doctors/doc8.jpg"),
-                        new Doctor("Юлія Козак", "+380509999999", proktologia, null, "/images/doctors/doc9.jpg"),
-                        new Doctor("Наталія Романюк", "+380501010101", plastic, null, "/images/doctors/doc10.jpeg"),
-                        new Doctor("Ольга Скрипка", "+380501234567", sudinnaHir, null, "/images/doctors/doc11.jpg"),
-                        new Doctor("Соломія Магура", "+380990077889", uzd, null, "/images/doctors/doc12.jpg")
+                        new Doctor("Петрова Іванна", "+380501111111", plastic, null, "/images/doctors/doc1.jpg"),
+                        new Doctor("Іваненко Олена", "+380502222222", endoskopia, null, "/images/doctors/doc2.jpg"),
+                        new Doctor("Шевченко Андрій", "+380503333333", proktologia, null, "/images/doctors/doc3.jpg"),
+                        new Doctor("Сидоренко Марія", "+380504444444", hirurgia, null, "/images/doctors/doc4.jpg"),
+                        new Doctor("Коваль Віктор", "+380505555555", sudinnaHir, null, "/images/doctors/doc5.jpg"),
+                        new Doctor("Дорош Оксана", "+380506666666", proktologia, null, "/images/doctors/doc6.jpeg"),
+                        new Doctor("Кравченко Сергій", "+380507777777", hirurgia, null, "/images/doctors/doc7.jpg"),
+                        new Doctor("Лисенко Тетяна", "+380508888888", uzd, null, "/images/doctors/doc8.jpg"),
+                        new Doctor("Козак Юлія", "+380509999999", proktologia, null, "/images/doctors/doc9.jpg"),
+                        new Doctor("Романюк Наталія", "+380501010101", plastic, null, "/images/doctors/doc10.jpeg"),
+                        new Doctor("Скрипка Ольга", "+380501234567", sudinnaHir, null, "/images/doctors/doc11.jpg"),
+                        new Doctor("Магура Соломія", "+380990077889", uzd, null, "/images/doctors/doc12.jpg")
                 );
 
                 doctorRepository.saveAll(doctors);

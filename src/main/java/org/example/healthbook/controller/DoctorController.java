@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.healthbook.dto.DoctorCreateDTO;
 import org.example.healthbook.dto.DoctorDTO;
 import org.example.healthbook.model.Doctor;
+import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.service.DoctorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +24,8 @@ import java.util.List;
 public class DoctorController {
 
     private final DoctorService doctorService;
+    private final DoctorRepository doctorRepository;
 
-    // ADMIN CRUD
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<DoctorDTO> getAllDoctors() {
@@ -32,6 +37,23 @@ public class DoctorController {
     public DoctorDTO getDoctorById(@PathVariable Long id) {
         return doctorService.getDoctorById(id);
     }
+
+@GetMapping("/page")
+@PreAuthorize("hasRole('ADMIN')")
+public Page<DoctorDTO> getDoctorsPaged(
+        @RequestParam int page,
+        @RequestParam int size,
+        @RequestParam(defaultValue = "fullName,asc") List<String> sort
+) {
+    Sort sortObj = Sort.by(
+            Sort.Order.by(sort.get(0)).with(Sort.Direction.fromString(sort.get(1)))
+    );
+    Pageable pageable = PageRequest.of(page, size, sortObj);
+    return doctorRepository.findAll(pageable)
+            .map(DoctorDTO::fromEntity);
+}
+
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
@@ -51,13 +73,11 @@ public class DoctorController {
         doctorService.deleteDoctor(id);
     }
 
-    // Публічний ендпоінт
     @GetMapping("/public")
     public List<DoctorDTO> getAllDoctorsPublic() {
         return doctorService.getAllDoctors();
     }
 
-    // Для лікаря: профіль
     @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/my-profile")
     public ResponseEntity<DoctorDTO> getMyProfile(Authentication auth) {

@@ -2,7 +2,12 @@ package org.example.healthbook.controller;
 
 import org.example.healthbook.dto.SpecializationDTO;
 import org.example.healthbook.model.Specialization;
+import org.example.healthbook.repository.SpecializationRepository;
 import org.example.healthbook.service.SpecializationService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +19,12 @@ import java.util.List;
 public class SpecializationController {
 
     private final SpecializationService specializationService;
+    private final SpecializationRepository specializationRepository;
 
-    public SpecializationController(SpecializationService specializationService) {
+    public SpecializationController(SpecializationService specializationService,
+                                    SpecializationRepository specializationRepository) {
         this.specializationService = specializationService;
+        this.specializationRepository = specializationRepository;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -32,6 +40,16 @@ public class SpecializationController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/page")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<SpecializationDTO> getPaged(@RequestParam int page, @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name"));
+        return specializationRepository.findAll(pageable)
+                .map(SpecializationDTO::fromEntity);
+    }
+
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping

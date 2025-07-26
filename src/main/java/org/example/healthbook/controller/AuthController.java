@@ -23,8 +23,12 @@ public class AuthController {
     }
 
     @PostMapping("/registerDoctor")
-    public User registerDoctor(@RequestParam String username, @RequestParam String password) {
-        return userService.registerDoctor(username, password);
+    public User registerDoctor(@RequestParam String username,
+                               @RequestParam String password,
+                               @RequestParam String fullName,
+                               @RequestParam String phone,
+                               @RequestParam Long specializationId) {
+        return userService.registerDoctor(username, password, fullName, phone, specializationId);
     }
 
     @GetMapping("/auth/me")

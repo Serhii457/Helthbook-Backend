@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.healthbook.dto.PatientDTO;
 import org.example.healthbook.model.Patient;
 import org.example.healthbook.service.PatientService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +40,14 @@ public class PatientController {
     @GetMapping("/{id}")
     public PatientDTO getPatientById(@PathVariable Long id) {
         return patientService.getPatientById(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/page")
+    public Page<PatientDTO> getPatientsPaged(@RequestParam int page, @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fullName"));
+        return patientService.getPatientsPaged(pageable)
+                .map(PatientDTO::fromEntity);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

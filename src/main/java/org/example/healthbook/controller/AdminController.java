@@ -22,7 +22,8 @@ public class AdminController {
             @RequestParam String username,
             @RequestParam String password,
             @RequestParam String fullName,
-            @RequestParam String phone) {
-        return userService.registerDoctor(username, password);
+            @RequestParam String phone,
+            @RequestParam Long specializationId) {
+        return userService.registerDoctor(username, password, fullName, phone, specializationId);
     }
 }

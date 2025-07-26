@@ -5,6 +5,10 @@ import org.example.healthbook.dto.AppointmentRequestDTO;
 import org.example.healthbook.model.*;
 import org.example.healthbook.repository.*;
 import org.example.healthbook.service.AppointmentRequestService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/appointment-requests")
 @RequiredArgsConstructor
@@ -28,6 +33,16 @@ public List<AppointmentRequestDTO> getAllRequests() {
             .map(AppointmentRequestDTO::fromEntity)
             .collect(Collectors.toList());
 }
+
+    @GetMapping("/page")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<AppointmentRequestDTO> getPaged(@RequestParam int page, @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending().and(Sort.by("time").descending()));
+        return requestRepository.findAll(pageable)
+                .map(AppointmentRequestDTO::fromEntity);
+    }
+
+
 @DeleteMapping("/{id}")
 @PreAuthorize("hasRole('ADMIN')")
 public void deleteRequest(@PathVariable Long id) {
