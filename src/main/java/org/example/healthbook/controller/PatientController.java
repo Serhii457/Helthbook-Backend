@@ -42,13 +42,32 @@ public class PatientController {
         return patientService.getPatientById(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/page")
-    public Page<PatientDTO> getPatientsPaged(@RequestParam int page, @RequestParam int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fullName"));
-        return patientService.getPatientsPaged(pageable)
-                .map(PatientDTO::fromEntity);
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/page")
+//    public Page<PatientDTO> getPatientsPaged(@RequestParam int page, @RequestParam int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("fullName"));
+//        return patientService.getPatientsPaged(pageable)
+//                .map(PatientDTO::fromEntity);
+//    }
+@GetMapping("/page")
+public Page<PatientDTO> getPatientsPaged(
+        @RequestParam int page,
+        @RequestParam int size,
+        @RequestParam(required = false, defaultValue = "fullName,asc") String sort) {
+
+    String[] sortParams = sort.split(",");
+    String sortField = sortParams[0];
+    Sort.Direction sortDirection = Sort.Direction.ASC;
+    if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+        sortDirection = Sort.Direction.DESC;
     }
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
+
+    return patientService.getPatientsPaged(pageable)
+            .map(PatientDTO::fromEntity);
+}
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping

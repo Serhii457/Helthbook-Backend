@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @Entity
@@ -18,6 +20,12 @@ public class MedicalRecord {
     private String diagnosis;
 
     private String recommendations;
+
+    @Column(length = 1000)
+    private String comment;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @ToString.Exclude

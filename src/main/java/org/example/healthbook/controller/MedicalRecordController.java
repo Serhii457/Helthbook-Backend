@@ -1,8 +1,7 @@
 package org.example.healthbook.controller;
 
+import org.example.healthbook.dto.MedicalRecordCreateDTO;
 import org.example.healthbook.dto.MedicalRecordDTO;
-import org.example.healthbook.model.MedicalRecord;
-import org.example.healthbook.repository.MedicalRecordRepository;
 import org.example.healthbook.service.MedicalRecordService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,21 +18,27 @@ import java.util.List;
 public class MedicalRecordController {
 
     private final MedicalRecordService medicalRecordService;
-    private final MedicalRecordRepository medicalRecordRepository;
 
-    public MedicalRecordController(MedicalRecordService medicalRecordService,
-                                   MedicalRecordRepository medicalRecordRepository) {
+    public MedicalRecordController(MedicalRecordService medicalRecordService) {
         this.medicalRecordService = medicalRecordService;
-        this.medicalRecordRepository = medicalRecordRepository;
     }
 
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
-    @GetMapping
-    public List<MedicalRecordDTO> getAll() {
-        return medicalRecordService.getAll();
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/page")
+    public ResponseEntity<Page<MedicalRecordDTO>> getPaged(
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(medicalRecordService.getPaged(pageable));
     }
 
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasRole('DOCTOR')")
+    @GetMapping("/my")
+    public ResponseEntity<List<MedicalRecordDTO>> getMyRecords() {
+        return ResponseEntity.ok(medicalRecordService.getRecordsForCurrentDoctor());
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<MedicalRecordDTO> getById(@PathVariable Long id) {
         return medicalRecordService.findById(id)
@@ -41,31 +46,19 @@ public class MedicalRecordController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/page")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Page<MedicalRecordDTO> getPaged(@RequestParam int page, @RequestParam int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return medicalRecordRepository.findAll(pageable)
-                .map(MedicalRecordDTO::fromEntity);
-    }
-
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @PostMapping
-    public MedicalRecord create(@RequestBody MedicalRecord record) {
-        return medicalRecordService.save(record);
+    public ResponseEntity<MedicalRecordDTO> create(@RequestBody MedicalRecordCreateDTO dto) {
+        return ResponseEntity.ok(medicalRecordService.create(dto));
     }
 
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @PutMapping("/{id}")
-    public ResponseEntity<MedicalRecord> update(@PathVariable Long id, @RequestBody MedicalRecord record) {
-        if (medicalRecordService.findById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        record.setId(id);
-        return ResponseEntity.ok(medicalRecordService.save(record));
+    public ResponseEntity<MedicalRecordDTO> update(@PathVariable Long id, @RequestBody MedicalRecordCreateDTO dto) {
+        return ResponseEntity.ok(medicalRecordService.update(dto, id));
     }
 
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (medicalRecordService.findById(id).isEmpty()) {

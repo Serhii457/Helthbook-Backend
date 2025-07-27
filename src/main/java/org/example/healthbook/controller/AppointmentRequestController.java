@@ -34,13 +34,39 @@ public List<AppointmentRequestDTO> getAllRequests() {
             .collect(Collectors.toList());
 }
 
-    @GetMapping("/page")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Page<AppointmentRequestDTO> getPaged(@RequestParam int page, @RequestParam int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending().and(Sort.by("time").descending()));
-        return requestRepository.findAll(pageable)
-                .map(AppointmentRequestDTO::fromEntity);
+//    @GetMapping("/page")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public Page<AppointmentRequestDTO> getPaged(@RequestParam int page, @RequestParam int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending().and(Sort.by("time").descending()));
+//        return requestRepository.findAll(pageable)
+//                .map(AppointmentRequestDTO::fromEntity);
+//    }
+@GetMapping("/page")
+@PreAuthorize("hasRole('ADMIN')")
+public Page<AppointmentRequestDTO> getPaged(
+        @RequestParam int page,
+        @RequestParam int size,
+        @RequestParam(required = false, defaultValue = "date,desc") String sort) {
+
+    String[] sortParams = sort.split(",");
+    String sortField = sortParams[0];
+    Sort.Direction sortDirection = Sort.Direction.ASC;
+    if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+        sortDirection = Sort.Direction.DESC;
     }
+
+    Sort sortObj;
+    if ("fullName".equalsIgnoreCase(sortField)) {
+        sortObj = Sort.by(sortDirection, "fullName");
+    } else if ("date".equalsIgnoreCase(sortField)) {
+        sortObj = Sort.by(sortDirection, "date").and(Sort.by(sortDirection, "time"));
+    } else {
+        sortObj = Sort.by(Sort.Direction.DESC, "date").and(Sort.by(Sort.Direction.DESC, "time"));
+    }
+
+    Pageable pageable = PageRequest.of(page, size, sortObj);
+    return requestRepository.findAll(pageable).map(AppointmentRequestDTO::fromEntity);
+}
 
 
 @DeleteMapping("/{id}")
