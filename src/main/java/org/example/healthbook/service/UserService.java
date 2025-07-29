@@ -51,21 +51,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-//    public User registerDoctor(String username, String password) {
-//        if (userRepository.findByUsername(username).isPresent()) {
-//            throw new RuntimeException("Пользователь уже существует");
-//        }
-//
-//        Role doctorRole = roleRepository.findById("ROLE_DOCTOR")
-//                .orElseThrow(() -> new RuntimeException("Роль ROLE_DOCTOR не найдена"));
-//
-//        User user = new User();
-//        user.setUsername(username);
-//        user.setPassword(passwordEncoder.encode(password));
-//        user.setRoles(Collections.singleton(doctorRole));
-//
-//        return userRepository.save(user);
-//    }
 public User registerDoctor(String username, String password, String fullName, String phone, Long specializationId) {
     if (userRepository.findByUsername(username).isPresent()) {
         throw new RuntimeException("Користувач вже існує");
@@ -85,8 +70,8 @@ public User registerDoctor(String username, String password, String fullName, St
 
     Doctor doctor = new Doctor();
     doctor.setUser(savedUser);
-    doctor.setFullName(fullName);
-    doctor.setPhone(phone);
+    //doctor.setFullName(fullName);
+    //doctor.setPhone(phone);
 
     Specialization specialization = specializationRepository.findById(specializationId)
             .orElseThrow(() -> new RuntimeException("Спеціалізацію не знайдено"));
@@ -99,10 +84,7 @@ public User registerDoctor(String username, String password, String fullName, St
     return savedUser;
 }
 
-
-
-
-    public Optional<User> findByUsername(String username) {
+public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 }

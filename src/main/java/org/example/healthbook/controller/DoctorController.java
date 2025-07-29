@@ -53,8 +53,6 @@ public Page<DoctorDTO> getDoctorsPaged(
             .map(DoctorDTO::fromEntity);
 }
 
-
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Doctor createDoctor(@RequestBody DoctorCreateDTO dto) {

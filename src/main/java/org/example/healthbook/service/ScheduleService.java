@@ -66,7 +66,8 @@ public class ScheduleService {
         ScheduleDTO dto = new ScheduleDTO();
         dto.setId(schedule.getId());
         dto.setDoctorId(schedule.getDoctor().getId());
-        dto.setDoctorName(schedule.getDoctor().getFullName());
+//        dto.setDoctorName(schedule.getDoctor().getFullName());
+        dto.setDoctorName(schedule.getDoctor().getUser() != null ? schedule.getDoctor().getUser().getFullName() : null);
         dto.setDayOfWeek(schedule.getDayOfWeek());
         dto.setStartTime(schedule.getStartTime().toString());
         return dto;

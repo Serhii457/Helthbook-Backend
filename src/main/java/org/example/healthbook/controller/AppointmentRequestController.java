@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,13 +35,6 @@ public List<AppointmentRequestDTO> getAllRequests() {
             .collect(Collectors.toList());
 }
 
-//    @GetMapping("/page")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public Page<AppointmentRequestDTO> getPaged(@RequestParam int page, @RequestParam int size) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending().and(Sort.by("time").descending()));
-//        return requestRepository.findAll(pageable)
-//                .map(AppointmentRequestDTO::fromEntity);
-//    }
 @GetMapping("/page")
 @PreAuthorize("hasRole('ADMIN')")
 public Page<AppointmentRequestDTO> getPaged(
@@ -80,4 +74,16 @@ public ResponseEntity<AppointmentRequest> createAppointmentRequest(@RequestBody 
     AppointmentRequest request = appointmentRequestService.createAppointmentRequest(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(request);
     }
+
+    @GetMapping("/page/doctor")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public Page<AppointmentRequestDTO> getDoctorRequestsPage(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(required = false, defaultValue = "date,desc") String sort,
+            @AuthenticationPrincipal(expression = "username") String username
+    ) {
+        return appointmentRequestService.getRequestsForDoctor(username, page, size, sort);
+    }
+
 }

@@ -68,7 +68,8 @@ public class AppointmentService {
         AppointmentDTO dto = new AppointmentDTO();
         dto.setId(appointment.getId());
         dto.setDoctorId(appointment.getDoctor().getId());
-        dto.setDoctorName(appointment.getDoctor().getFullName());
+        dto.setDoctorName(appointment.getDoctor().getUser() != null ? appointment.getDoctor().getUser().getFullName() : null);
+        //        dto.setDoctorName(appointment.getDoctor().getFullName());
         dto.setPatientId(appointment.getPatient().getId());
         //dto.setPatientName(appointment.getPatient().getFullName());
         dto.setDate(appointment.getDate().toString());

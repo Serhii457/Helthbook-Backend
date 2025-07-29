@@ -8,4 +8,5 @@ public class DoctorCreateDTO {
     private String phone;
     private String username;
     private Long specializationId;
+    private String photoUrl;
 }

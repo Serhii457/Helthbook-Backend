@@ -1,3 +1,137 @@
+//package org.example.healthbook.service;
+//
+//import org.example.healthbook.dto.DoctorCreateDTO;
+//import org.example.healthbook.dto.DoctorDTO;
+//import org.example.healthbook.dto.ScheduleDayDTO;
+//import org.example.healthbook.model.Doctor;
+//import org.example.healthbook.model.Schedule;
+//import org.example.healthbook.model.Specialization;
+//import org.example.healthbook.model.User;
+//import org.example.healthbook.repository.DoctorRepository;
+//import org.example.healthbook.repository.SpecializationRepository;
+//import org.example.healthbook.repository.UserRepository;
+//import org.springframework.stereotype.Service;
+//
+//import java.time.format.DateTimeFormatter;
+//import java.util.List;
+//import java.util.Map;
+//import java.util.Optional;
+//import java.util.stream.Collectors;
+//
+//@Service
+//public class DoctorService {
+//
+//    private final DoctorRepository doctorRepository;
+//    private final UserRepository userRepository;
+//    private final SpecializationRepository specializationRepository;
+//
+//    public DoctorService(DoctorRepository doctorRepository,
+//                         UserRepository userRepository,
+//                         SpecializationRepository specializationRepository) {
+//        this.doctorRepository = doctorRepository;
+//        this.userRepository = userRepository;
+//        this.specializationRepository = specializationRepository;
+//    }
+//
+//    public Doctor createDoctorFromDTO(DoctorCreateDTO dto) {
+//        User user = userRepository.findByUsername(dto.getUsername())
+//                .orElseThrow(() -> new RuntimeException("Користувача не знайдено: " + dto.getUsername()));
+//
+//        Specialization specialization = specializationRepository.findById(dto.getSpecializationId())
+//                .orElseThrow(() -> new RuntimeException("Спеціалізацію не знайдено"));
+//
+//        Doctor doctor = new Doctor();
+//        doctor.setFullName(dto.getFullName());
+//        doctor.setPhone(dto.getPhone());
+//        doctor.setUser(user);
+//        doctor.setSpecialization(specialization);
+//
+//        return doctorRepository.save(doctor);
+//    }
+//
+//    public List<DoctorDTO> getAllDoctors() {
+//        return doctorRepository.findAll().stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
+//
+//    public DoctorDTO getDoctorById(Long id) {
+//        Doctor doctor = getDoctorByIdEntity(id);
+//        return convertToDTO(doctor);
+//    }
+//
+//    public Doctor createDoctor(Doctor doctor) {
+//        return doctorRepository.save(doctor);
+//    }
+//
+//    public Doctor updateDoctor(Long id, Doctor doctorDetails) {
+//        Doctor doctor = getDoctorByIdEntity(id);
+//        doctor.setFullName(doctorDetails.getFullName());
+//        doctor.setSpecialization(doctorDetails.getSpecialization());
+//        doctor.setPhone(doctorDetails.getPhone());
+//        doctor.setUser(doctorDetails.getUser());
+//        return doctorRepository.save(doctor);
+//    }
+//
+//    public void deleteDoctor(Long id) {
+//        doctorRepository.deleteById(id);
+//    }
+//
+//    public DoctorDTO findByUsername(String username) {
+//        Optional<User> userOpt = userRepository.findByUsername(username);
+//        if (userOpt.isEmpty()) return null;
+//
+//        Optional<Doctor> doctorOpt = doctorRepository.findByUser(userOpt.get());
+//        return doctorOpt.map(this::convertToDTO).orElse(null);
+//    }
+//
+//    public void updateByUsername(String username, DoctorDTO dto) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
+//
+//        Doctor doctor = doctorRepository.findByUser(user)
+//                .orElseThrow(() -> new RuntimeException("Доктора не знайдено"));
+//
+//        doctor.setFullName(dto.getFullName());
+//        doctor.setPhone(dto.getPhone());
+//        doctorRepository.save(doctor);
+//    }
+//
+//    private DoctorDTO convertToDTO(Doctor doctor) {
+//        DoctorDTO doctorDTO = new DoctorDTO();
+//        doctorDTO.setId(doctor.getId());
+//        doctorDTO.setFullName(doctor.getFullName());
+//        doctorDTO.setPhone(doctor.getPhone());
+//        doctorDTO.setSpecialization(doctor.getSpecialization() != null ? doctor.getSpecialization().getName() : null);
+//        doctorDTO.setPhotoUrl(doctor.getPhotoUrl());
+//
+//        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+//
+//        Map<String, List<String>> grouped = doctor.getSchedule().stream()
+//                .collect(Collectors.groupingBy(
+//                        Schedule::getDayOfWeek,
+//                        Collectors.mapping(s -> s.getStartTime().format(timeFormatter), Collectors.toList())
+//                ));
+//
+//        List<ScheduleDayDTO> schedule = grouped.entrySet().stream().map(entry -> {
+//            ScheduleDayDTO scheduleDayDTO = new ScheduleDayDTO();
+//            scheduleDayDTO.setDay(entry.getKey());
+//            scheduleDayDTO.setTimes(entry.getValue());
+//            return scheduleDayDTO;
+//        }).collect(Collectors.toList());
+//
+//        doctorDTO.setSchedule(schedule);
+//
+//
+//        return doctorDTO;
+//    }
+//
+//    private Doctor getDoctorByIdEntity(Long id) {
+//        return doctorRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Доктор не знайдено"));
+//    }
+//}
+
 package org.example.healthbook.service;
 
 import org.example.healthbook.dto.DoctorCreateDTO;
@@ -33,18 +167,23 @@ public class DoctorService {
         this.specializationRepository = specializationRepository;
     }
 
+    // Создание доктора вместе с обновлением данных пользователя (ФИО, телефон)
     public Doctor createDoctorFromDTO(DoctorCreateDTO dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено: " + dto.getUsername()));
+
+        // Обновляем информацию пользователя
+        user.setFullName(dto.getFullName());
+        user.setPhone(dto.getPhone());
+        userRepository.save(user);
 
         Specialization specialization = specializationRepository.findById(dto.getSpecializationId())
                 .orElseThrow(() -> new RuntimeException("Спеціалізацію не знайдено"));
 
         Doctor doctor = new Doctor();
-        doctor.setFullName(dto.getFullName());
-        doctor.setPhone(dto.getPhone());
         doctor.setUser(user);
         doctor.setSpecialization(specialization);
+        doctor.setPhotoUrl(dto.getPhotoUrl());
 
         return doctorRepository.save(doctor);
     }
@@ -60,16 +199,25 @@ public class DoctorService {
         return convertToDTO(doctor);
     }
 
+    // Метод сохранения доктора напрямую
     public Doctor createDoctor(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
 
+    // Обновление доктора и связанного пользователя
     public Doctor updateDoctor(Long id, Doctor doctorDetails) {
         Doctor doctor = getDoctorByIdEntity(id);
-        doctor.setFullName(doctorDetails.getFullName());
+
+        User user = doctor.getUser();
+        if (user != null) {
+            // Обновляем данные пользователя
+            user.setFullName(doctorDetails.getUser() != null ? doctorDetails.getUser().getFullName() : user.getFullName());
+            user.setPhone(doctorDetails.getUser() != null ? doctorDetails.getUser().getPhone() : user.getPhone());
+            userRepository.save(user);
+        }
+
         doctor.setSpecialization(doctorDetails.getSpecialization());
-        doctor.setPhone(doctorDetails.getPhone());
-        doctor.setUser(doctorDetails.getUser());
+        doctor.setPhotoUrl(doctorDetails.getPhotoUrl());
         return doctorRepository.save(doctor);
     }
 
@@ -85,6 +233,7 @@ public class DoctorService {
         return doctorOpt.map(this::convertToDTO).orElse(null);
     }
 
+    // Обновление доктора по имени пользователя, с обновлением данных пользователя
     public void updateByUsername(String username, DoctorDTO dto) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
@@ -92,16 +241,27 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Доктора не знайдено"));
 
-        doctor.setFullName(dto.getFullName());
-        doctor.setPhone(dto.getPhone());
+        // Обновляем данные пользователя
+        user.setFullName(dto.getFullName());
+        user.setPhone(dto.getPhone());
+        userRepository.save(user);
+
+        doctor.setPhotoUrl(dto.getPhotoUrl());
         doctorRepository.save(doctor);
     }
 
     private DoctorDTO convertToDTO(Doctor doctor) {
         DoctorDTO doctorDTO = new DoctorDTO();
         doctorDTO.setId(doctor.getId());
-        doctorDTO.setFullName(doctor.getFullName());
-        doctorDTO.setPhone(doctor.getPhone());
+
+        if (doctor.getUser() != null) {
+            doctorDTO.setFullName(doctor.getUser().getFullName());
+            doctorDTO.setPhone(doctor.getUser().getPhone());
+        } else {
+            doctorDTO.setFullName(null);
+            doctorDTO.setPhone(null);
+        }
+
         doctorDTO.setSpecialization(doctor.getSpecialization() != null ? doctor.getSpecialization().getName() : null);
         doctorDTO.setPhotoUrl(doctor.getPhotoUrl());
 
@@ -121,7 +281,6 @@ public class DoctorService {
         }).collect(Collectors.toList());
 
         doctorDTO.setSchedule(schedule);
-
 
         return doctorDTO;
     }

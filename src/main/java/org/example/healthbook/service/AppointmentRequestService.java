@@ -6,6 +6,10 @@ import org.example.healthbook.model.*;
 import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.repository.PatientRepository;
 import org.example.healthbook.repository.AppointmentRequestRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,4 +39,30 @@ public class AppointmentRequestService {
 
         return requestRepository.save(request);
     }
+
+    public Page<AppointmentRequestDTO> getRequestsForDoctor(String username, int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        Sort.Direction sortDirection = (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc"))
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        Sort sortObj;
+        if ("fullName".equalsIgnoreCase(sortField)) {
+            sortObj = Sort.by(sortDirection, "fullName");
+        } else if ("date".equalsIgnoreCase(sortField)) {
+            sortObj = Sort.by(sortDirection, "date").and(Sort.by(sortDirection, "time"));
+        } else {
+            sortObj = Sort.by(Sort.Direction.DESC, "date").and(Sort.by(Sort.Direction.DESC, "time"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Doctor doctor = doctorRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        return requestRepository.findByDoctor(doctor, pageable)
+                .map(AppointmentRequestDTO::fromEntity);
+    }
+
 }

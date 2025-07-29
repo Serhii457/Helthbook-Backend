@@ -120,7 +120,7 @@ public class AppointmentController {
         appointment = appointmentRepository.save(appointment);
 
         dto.setId(appointment.getId());
-        dto.setDoctorName(doctor.getFullName());
+        dto.setDoctorName(doctor.getUser().getFullName());
         dto.setPatientId(patient.getId());
         dto.setPatientName(patient.getFullName());
         dto.setStatus(appointment.getStatus().name());
