@@ -22,7 +22,6 @@ public class AppointmentRequestDTO {
         dto.setFullName(request.getFullName());
         dto.setPhone(request.getPhone());
         dto.setDoctorId(request.getDoctor().getId());
-//        dto.setDoctorName(request.getDoctor() != null ? request.getDoctor().getFullName() : null);
         dto.setDoctorName(request.getDoctor() != null && request.getDoctor().getUser() != null
                 ? request.getDoctor().getUser().getFullName()
                 : null);
