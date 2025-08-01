@@ -5,6 +5,7 @@ import org.example.healthbook.dto.MedicalRecordCreateDTO;
 import org.example.healthbook.dto.MedicalRecordDTO;
 import org.example.healthbook.service.MedicalRecordService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,4 +51,13 @@ public class MedicalRecordController {
         medicalRecordService.deleteRecordById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/doctor/all")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<List<MedicalRecordDTO>> getAllRecordsForDoctor(Authentication authentication) {
+        String username = authentication.getName();
+        List<MedicalRecordDTO> records = medicalRecordService.getAllRecordsForDoctor(username);
+        return ResponseEntity.ok(records);
+    }
+
 }

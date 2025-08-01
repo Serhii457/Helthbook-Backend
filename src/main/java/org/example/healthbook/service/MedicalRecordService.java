@@ -9,6 +9,7 @@ import org.example.healthbook.model.Patient;
 import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.repository.MedicalRecordRepository;
 import org.example.healthbook.repository.PatientRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -89,6 +90,18 @@ public class MedicalRecordService {
         dto.setDoctorName(record.getDoctor().getUser().getFullName());
         dto.setPatientId(record.getPatient().getId());
         dto.setPatientName(record.getPatient().getUser().getFullName());
+        dto.setPatientPhone(record.getPatient().getUser().getPhone());
         return dto;
     }
+
+    public List<MedicalRecordDTO> getAllRecordsForDoctor(String username) {
+        Doctor doctor = doctorRepository.findByUserUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Doctor not found"));
+        List<MedicalRecord> records = medicalRecordRepository.findByDoctorId(doctor.getId());
+
+        return records.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }

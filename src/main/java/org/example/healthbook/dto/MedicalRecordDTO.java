@@ -14,4 +14,6 @@ public class MedicalRecordDTO {
     private String diagnosis;
     private String comment;
     private LocalDate date;
+    private String patientPhone;
+
 }
