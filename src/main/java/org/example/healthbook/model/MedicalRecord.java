@@ -36,4 +36,10 @@ public class MedicalRecord {
     @ToString.Exclude
     @JoinColumn(name = "patient_id")
     private Patient patient;
+
+    @ManyToOne
+    @ToString.Exclude
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
+
 }

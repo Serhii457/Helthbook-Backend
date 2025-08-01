@@ -15,6 +15,8 @@ public class AppointmentRequestDTO {
     private String note;
     private Long id;
     private String status;
+    private Long patientId;
+
 
     public static AppointmentRequestDTO fromEntity(AppointmentRequest request) {
         AppointmentRequestDTO dto = new AppointmentRequestDTO();
@@ -30,6 +32,9 @@ public class AppointmentRequestDTO {
         dto.setTime(request.getTime().toString());
         dto.setNote(request.getNote());
         dto.setStatus(request.getStatus().name());
+        if (request.getPatient() != null) {
+            dto.setPatientId(request.getPatient().getId());
+        }
         return dto;
     }
 }
