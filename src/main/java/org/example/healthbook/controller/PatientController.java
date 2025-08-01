@@ -42,8 +42,8 @@ public class PatientController {
         return patientService.getPatientById(id);
     }
 
-@GetMapping("/page")
-public Page<PatientDTO> getPatientsPaged(
+    @GetMapping("/page")
+    public Page<PatientDTO> getPatientsPaged(
         @RequestParam int page,
         @RequestParam int size,
         @RequestParam(required = false, defaultValue = "fullName,asc") String sort) {
@@ -59,8 +59,7 @@ public Page<PatientDTO> getPatientsPaged(
 
     return patientService.getPatientsPaged(pageable)
             .map(PatientDTO::fromEntity);
-}
-
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping

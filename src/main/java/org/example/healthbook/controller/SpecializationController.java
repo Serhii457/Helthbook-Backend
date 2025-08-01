@@ -49,8 +49,6 @@ public class SpecializationController {
                 .map(SpecializationDTO::fromEntity);
     }
 
-
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Specialization create(@RequestBody Specialization specialization) {

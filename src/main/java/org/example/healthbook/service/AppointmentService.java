@@ -69,9 +69,7 @@ public class AppointmentService {
         dto.setId(appointment.getId());
         dto.setDoctorId(appointment.getDoctor().getId());
         dto.setDoctorName(appointment.getDoctor().getUser() != null ? appointment.getDoctor().getUser().getFullName() : null);
-        //        dto.setDoctorName(appointment.getDoctor().getFullName());
         dto.setPatientId(appointment.getPatient().getId());
-        //dto.setPatientName(appointment.getPatient().getFullName());
         dto.setDate(appointment.getDate().toString());
         dto.setTime(appointment.getTime().toString());
         dto.setStatus(appointment.getStatus().name());
@@ -79,16 +77,14 @@ public class AppointmentService {
     }
 
     public boolean isDoctorAvailable(Doctor doctor, LocalDate date, LocalTime time) {
-        String dayOfWeek = capitalize(date.getDayOfWeek().name().toLowerCase()); // Наприклад: "Monday"
+        String dayOfWeek = capitalize(date.getDayOfWeek().name().toLowerCase());
 
-        // Перевірити чи цей час є у розкладі лікаря
         List<Schedule> schedules = scheduleRepository.findByDoctorAndDayOfWeek(doctor, dayOfWeek);
         boolean timeInSchedule = schedules.stream()
                 .anyMatch(s -> s.getStartTime().equals(time));
 
         if (!timeInSchedule) return false;
 
-        // Перевірити чи цей слот ще не зайнятий
         return appointmentRepository.findByDoctorAndDateAndTime(doctor, date, time).isEmpty();
     }
 

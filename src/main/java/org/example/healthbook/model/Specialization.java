@@ -20,5 +20,4 @@ public class Specialization {
     public Specialization(String name) {
         this.name = name;
     }
-
 }

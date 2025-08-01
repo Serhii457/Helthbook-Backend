@@ -85,5 +85,4 @@ public ResponseEntity<AppointmentRequest> createAppointmentRequest(@RequestBody 
     ) {
         return appointmentRequestService.getRequestsForDoctor(username, page, size, sort);
     }
-
 }

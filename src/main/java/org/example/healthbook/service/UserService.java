@@ -70,8 +70,6 @@ public User registerDoctor(String username, String password, String fullName, St
 
     Doctor doctor = new Doctor();
     doctor.setUser(savedUser);
-    //doctor.setFullName(fullName);
-    //doctor.setPhone(phone);
 
     Specialization specialization = specializationRepository.findById(specializationId)
             .orElseThrow(() -> new RuntimeException("Спеціалізацію не знайдено"));

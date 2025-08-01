@@ -9,10 +9,14 @@ import org.example.healthbook.model.Patient;
 import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.repository.MedicalRecordRepository;
 import org.example.healthbook.repository.PatientRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,8 +67,8 @@ public class MedicalRecordService {
         Patient patient = patientRepository.findById(dto.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        record.setDoctor(doctor); // обычно не меняется, но на всякий случай
-        record.setPatient(patient); // тоже можно не менять, если нужно
+        record.setDoctor(doctor);
+        record.setPatient(patient);
         record.setDiagnosis(dto.getDiagnosis());
         record.setComment(dto.getComment());
 
@@ -89,7 +93,7 @@ public class MedicalRecordService {
         dto.setDoctorId(record.getDoctor().getId());
         dto.setDoctorName(record.getDoctor().getUser().getFullName());
         dto.setPatientId(record.getPatient().getId());
-        dto.setPatientName(record.getPatient().getUser().getFullName());
+        dto.setPatientFullName(record.getPatient().getUser().getFullName());
         dto.setPatientPhone(record.getPatient().getUser().getPhone());
         return dto;
     }
@@ -100,8 +104,17 @@ public class MedicalRecordService {
         List<MedicalRecord> records = medicalRecordRepository.findByDoctorId(doctor.getId());
 
         return records.stream()
+                .sorted(Comparator.comparing(r -> r.getPatient().getUser().getFullName()))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    public Page<MedicalRecordDTO> getAllRecordsForAdmin(Pageable pageable) {
+        Page<MedicalRecord> recordsPage = medicalRecordRepository.findAll(pageable);
+        List<MedicalRecordDTO> dtoList = recordsPage.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtoList, pageable, recordsPage.getTotalElements());
+    }
 }

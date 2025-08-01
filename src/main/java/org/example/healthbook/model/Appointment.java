@@ -18,10 +18,10 @@ public class Appointment {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDate date;  // можно LocalDate, но для простоты String
+    private LocalDate date;
 
     @Column(nullable = false)
-    private LocalTime time;  // можно LocalTime, но для простоты String
+    private LocalTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude

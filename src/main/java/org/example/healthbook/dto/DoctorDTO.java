@@ -25,5 +25,4 @@ public class DoctorDTO {
         dto.setSchedule(null);
         return dto;
     }
-
 }

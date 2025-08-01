@@ -95,7 +95,7 @@ public class PatientService {
             newUser.setFullName(fullName);
             newUser.setPhone(phone);
             newUser.setUsername(UUID.randomUUID().toString());
-            newUser.setPassword(UUID.randomUUID().toString()); // Не входить до системи
+            newUser.setPassword(UUID.randomUUID().toString());
             newUser.setRoles(Set.of(role));
             return userRepository.save(newUser);
         });

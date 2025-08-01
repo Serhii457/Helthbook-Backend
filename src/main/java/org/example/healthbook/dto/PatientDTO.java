@@ -22,5 +22,4 @@ public class PatientDTO {
                 patient.getUser() != null ? patient.getUser().getId() : null
         );
     }
-
 }
