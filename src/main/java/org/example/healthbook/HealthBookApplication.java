@@ -75,7 +75,6 @@ public class HealthBookApplication {
 
             if (doctorRepository.count() == 0) {
 
-                // Вспомогательный локальный класс для данных врачей
                 record DoctorData(String fullName, String phone, Specialization specialization, String photoUrl) {}
 
                 List<DoctorData> doctorsData = List.of(
