@@ -3,9 +3,8 @@ package org.example.healthbook.service;
 import lombok.RequiredArgsConstructor;
 import org.example.healthbook.dto.MedicalRecordCreateDTO;
 import org.example.healthbook.dto.MedicalRecordDTO;
-import org.example.healthbook.model.Doctor;
-import org.example.healthbook.model.MedicalRecord;
-import org.example.healthbook.model.Patient;
+import org.example.healthbook.model.*;
+import org.example.healthbook.repository.AppointmentRepository;
 import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.repository.MedicalRecordRepository;
 import org.example.healthbook.repository.PatientRepository;
@@ -27,6 +26,7 @@ public class MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
+    private final AppointmentRepository appointmentRepository;
 
     public List<MedicalRecordDTO> getAllRecords() {
         return medicalRecordRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
@@ -43,6 +43,14 @@ public class MedicalRecordService {
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
         Patient patient = patientRepository.findById(dto.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        if (dto.getAppointmentId() != null) {
+            Appointment appointment = appointmentRepository.findById(dto.getAppointmentId())
+                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
+            if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+                throw new IllegalStateException("Cannot add record to a completed appointment");
+            }
+        }
 
         MedicalRecord record = new MedicalRecord();
         record.setDoctor(doctor);
@@ -62,6 +70,11 @@ public class MedicalRecordService {
             throw new RuntimeException("Access denied");
         }
 
+        if (record.getAppointment() != null
+                && record.getAppointment().getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot edit record of a completed appointment");
+        }
+
         Doctor doctor = doctorRepository.findByUserUsername(doctorUsername)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
         Patient patient = patientRepository.findById(dto.getPatientId())
@@ -78,9 +91,14 @@ public class MedicalRecordService {
 
 
     public void deleteRecordById(Long id) {
-        if (!medicalRecordRepository.existsById(id)) {
-            throw new RuntimeException("Medical record not found");
+        MedicalRecord record = medicalRecordRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medical record not found"));
+
+        if (record.getAppointment() != null
+                && record.getAppointment().getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot delete record of a completed appointment");
         }
+
         medicalRecordRepository.deleteById(id);
     }
 

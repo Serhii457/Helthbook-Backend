@@ -40,5 +40,8 @@ public class AppointmentRequest {
     @ToString.Exclude
     private Patient patient;
 
+    @OneToOne(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Appointment appointment;
+
 }
 

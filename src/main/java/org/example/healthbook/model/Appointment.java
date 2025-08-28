@@ -28,6 +28,10 @@ public class Appointment {
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
+    @OneToOne
+    @JoinColumn(name = "request_id")
+    private AppointmentRequest request;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(name = "doctor_id")

@@ -7,4 +7,5 @@ public class MedicalRecordCreateDTO {
     private Long patientId;
     private String diagnosis;
     private String comment;
+    private Long appointmentId;
 }

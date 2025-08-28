@@ -85,4 +85,29 @@ public ResponseEntity<AppointmentRequest> createAppointmentRequest(@RequestBody 
     ) {
         return appointmentRequestService.getRequestsForDoctor(username, page, size, sort);
     }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AppointmentRequestDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestParam AppointmentRequestStatus status
+    ) {
+        AppointmentRequest updated = appointmentRequestService.updateStatus(id, status);
+        return ResponseEntity.ok(AppointmentRequestDTO.fromEntity(updated));
+    }
+
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AppointmentRequestDTO> approveRequest(@PathVariable Long id) {
+        AppointmentRequest updated = appointmentRequestService.updateStatus(id, AppointmentRequestStatus.APPROVED);
+        return ResponseEntity.ok(AppointmentRequestDTO.fromEntity(updated));
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AppointmentRequestDTO> rejectRequest(@PathVariable Long id) {
+        AppointmentRequest updated = appointmentRequestService.updateStatus(id, AppointmentRequestStatus.REJECTED);
+        return ResponseEntity.ok(AppointmentRequestDTO.fromEntity(updated));
+    }
+
 }

@@ -22,6 +22,7 @@ import java.util.Set;
 public class AppointmentRequestService {
 
     private final AppointmentRequestRepository requestRepository;
+    private final AppointmentRepository appointmentRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
@@ -94,4 +95,31 @@ public class AppointmentRequestService {
         Page<AppointmentRequest> requests = requestRepository.findByDoctor(doctor, pageable);
         return requests.map(AppointmentRequestDTO::fromEntity);
     }
+
+    @Transactional
+    public AppointmentRequest updateStatus(Long requestId, AppointmentRequestStatus status) {
+        AppointmentRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Заявку не знайдено"));
+
+        request.setStatus(status);
+
+        if (status == AppointmentRequestStatus.APPROVED) {
+            if (request.getAppointment() == null) {
+                Appointment appointment = new Appointment();
+                appointment.setDate(request.getDate());
+                appointment.setTime(request.getTime());
+                appointment.setDoctor(request.getDoctor());
+                appointment.setPatient(request.getPatient());
+                appointment.setStatus(AppointmentStatus.SCHEDULED);
+                appointment.setRequest(request);
+
+                request.setAppointment(appointment);
+            }
+        } else if (status == AppointmentRequestStatus.REJECTED) {
+            request.setAppointment(null);
+        }
+
+        return requestRepository.save(request);
+    }
+
 }

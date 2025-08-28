@@ -9,6 +9,7 @@ import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.service.AppointmentRequestService;
 import org.example.healthbook.service.AppointmentService;
 import org.example.healthbook.service.PatientService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +47,19 @@ public class AppointmentController {
     @GetMapping
     public List<AppointmentDTO> getAllAppointments() {
         return appointmentService.getAllAppointments();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/page")
+    public ResponseEntity<Page<AppointmentDTO>> getAllAppointmentsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "date") String sort,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        return ResponseEntity.ok(
+                appointmentService.getAllAppointmentsPaged(page, size, sort, direction)
+        );
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
@@ -95,6 +109,20 @@ public class AppointmentController {
         return appointmentService.getAppointmentsForDoctor(principal.getName());
     }
 
+    @PreAuthorize("hasRole('DOCTOR')")
+    @GetMapping("/doctor")
+    public ResponseEntity<Page<AppointmentDTO>> getDoctorAppointmentsPaged(
+            Principal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "date") String sort,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        return ResponseEntity.ok(
+                appointmentService.findByDoctorUsernamePaged(principal.getName(), page, size, sort, direction)
+        );
+    }
+
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
     @PostMapping("/appointments")
     public AppointmentDTO createAppointment(@RequestBody AppointmentDTO dto) {
@@ -127,4 +155,33 @@ public class AppointmentController {
 
         return dto;
     }
+
+    @PreAuthorize("hasRole('DOCTOR')")
+    @PutMapping("/{id}/start")
+    public ResponseEntity<AppointmentDTO> startAppointment(@PathVariable Long id) {
+        Appointment updated = appointmentService.startAppointment(id);
+        return ResponseEntity.ok(AppointmentDTO.fromEntity(updated));
+    }
+
+    @PreAuthorize("hasRole('DOCTOR')")
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<AppointmentDTO> completeAppointment(@PathVariable Long id) {
+        Appointment updated = appointmentService.updateStatus(id, AppointmentStatus.COMPLETED);
+        return ResponseEntity.ok(AppointmentDTO.fromEntity(updated));
+    }
+
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<AppointmentDTO> cancelAppointment(@PathVariable Long id) {
+        Appointment updated = appointmentService.updateStatus(id, AppointmentStatus.CANCELLED);
+        return ResponseEntity.ok(AppointmentDTO.fromEntity(updated));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<AppointmentDTO> approveAppointment(@PathVariable Long id) {
+        Appointment updated = appointmentService.updateStatus(id, AppointmentStatus.SCHEDULED);
+        return ResponseEntity.ok(AppointmentDTO.fromEntity(updated));
+    }
+
 }
