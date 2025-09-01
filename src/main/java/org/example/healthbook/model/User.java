@@ -27,6 +27,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String phone;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Patient patient;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),

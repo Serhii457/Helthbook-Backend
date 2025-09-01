@@ -4,7 +4,6 @@ import org.example.healthbook.dto.PatientDTO;
 import org.example.healthbook.model.Patient;
 import org.example.healthbook.model.Role;
 import org.example.healthbook.model.User;
-import org.example.healthbook.repository.AppointmentRequestRepository;
 import org.example.healthbook.repository.PatientRepository;
 import org.example.healthbook.repository.RoleRepository;
 import org.example.healthbook.repository.UserRepository;
@@ -24,29 +23,29 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final AppointmentRequestRepository appointmentRequestRepository;
 
     public PatientService(PatientRepository patientRepository,
                           UserRepository userRepository,
-                          RoleRepository roleRepository,
-                          AppointmentRequestRepository appointmentRequestRepository){
+                          RoleRepository roleRepository)
+    {
         this.patientRepository = patientRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.appointmentRequestRepository = appointmentRequestRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Patient> getAllPatients() {
         return patientRepository.findAll();
     }
 
-
+    @Transactional(readOnly = true)
     public PatientDTO getPatientById(Long id) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Пациент не найден"));
         return convertToDTO(patient);
     }
 
+    @Transactional
     public Patient createPatient(Patient patient) {
         return patientRepository.save(patient);
     }
@@ -62,10 +61,10 @@ public class PatientService {
 
     @Transactional
     public void deletePatient(Long id) {
-        appointmentRequestRepository.deleteAllByPatientId(id);
-        patientRepository.deleteById(id);
-    }
-
+        Patient patient = patientRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Пацієнт не знайдений"));
+        patientRepository.delete(patient);
+}
     private PatientDTO convertToDTO(Patient patient) {
         PatientDTO dto = new PatientDTO();
         dto.setId(patient.getId());
@@ -107,6 +106,7 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
+    @Transactional(readOnly = true)
     public Page<Patient> getPatientsPaged(Pageable pageable) {
         return patientRepository.findAll(pageable);
     }

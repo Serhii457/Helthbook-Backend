@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,6 +40,7 @@ public class AppointmentService {
         this.scheduleRepository = scheduleRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsForDoctor(String username) {
         Doctor doctor = doctorRepository.findByUserUsername(username)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
@@ -48,48 +50,37 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AppointmentDTO> getAllAppointments() {
         return appointmentRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    public Page<AppointmentDTO> getAllAppointmentsPaged(int page, int size, String sortField, String sortDirection) {
-        String field = (sortField == null || sortField.isBlank()) ? "date" : sortField;
-        String direction = (sortDirection == null || sortDirection.isBlank()) ? "desc" : sortDirection;
-
-        Sort sort = Sort.by(field);
-        sort = "asc".equalsIgnoreCase(direction) ? sort.ascending() : sort.descending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<Appointment> result = appointmentRepository.findAll(pageable);
-        List<AppointmentDTO> mapped = result.getContent().stream()
-                .map(this::convertToDTO)
-                .toList();
-
-        return new PageImpl<>(mapped, pageable, result.getTotalElements());
-    }
-
+    @Transactional(readOnly = true)
     public Optional<AppointmentDTO> findById(Long id) {
         return appointmentRepository.findById(id)
                 .map(this::convertToDTO);
     }
 
+    @Transactional
     public Appointment save(Appointment appointment) {
         return appointmentRepository.save(appointment);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         appointmentRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<AppointmentDTO> findByDoctorUsername(String username) {
         return appointmentRepository.findByDoctorUserUsername(username).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Page<AppointmentDTO> findByDoctorUsernamePaged(String username, int page, int size, String sortField, String sortDirection) {
         Sort sort = Sort.by(sortField == null || sortField.isBlank() ? "date" : sortField);
         sort = "asc".equalsIgnoreCase(sortDirection) ? sort.ascending() : sort.descending();
@@ -113,6 +104,7 @@ public class AppointmentService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public boolean isDoctorAvailable(Doctor doctor, LocalDate date, LocalTime time) {
         String dayOfWeek = capitalize(date.getDayOfWeek().name().toLowerCase());
 
@@ -130,6 +122,7 @@ public class AppointmentService {
         return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 
+    @Transactional
     public Appointment updateStatus(Long id, AppointmentStatus newStatus) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -138,6 +131,7 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    @Transactional
     public Appointment startAppointment(Long id) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -148,6 +142,7 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    @Transactional
     public Appointment completeAppointment(Long id) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -157,4 +152,23 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.COMPLETED);
         return appointmentRepository.save(appointment);
     }
+
+    @Transactional(readOnly = true)
+    public Page<AppointmentDTO> getAppointmentsPaged(int page, int size, String sortField, String sortDirection,
+                                                     String status, String search) {
+        Sort sort = Sort.by(sortField == null || sortField.isBlank() ? "date" : sortField);
+        sort = "asc".equalsIgnoreCase(sortDirection) ? sort.ascending() : sort.descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        AppointmentStatus parsedStatus = null;
+        if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
+            parsedStatus = AppointmentStatus.valueOf(status);
+        }
+
+        Page<Appointment> result = appointmentRepository.findFilteredAppointments(parsedStatus, search, pageable);
+        List<AppointmentDTO> mapped = result.getContent().stream().map(this::convertToDTO).toList();
+
+        return new PageImpl<>(mapped, pageable, result.getTotalElements());
+    }
+
 }

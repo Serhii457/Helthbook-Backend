@@ -7,6 +7,7 @@ import org.example.healthbook.dto.TopDoctorDTO;
 import org.example.healthbook.model.AppointmentStatus;
 import org.example.healthbook.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -18,6 +19,7 @@ public class AnalyticsService {
 
     private final AppointmentRepository appointmentRepository;
 
+    @Transactional(readOnly = true)
     public List<AppointmentsPerDayDTO> getAppointmentsPerDay(LocalDate from, LocalDate to) {
         List<Object[]> results = appointmentRepository.countAppointmentsPerDay(from, to);
 
@@ -26,6 +28,7 @@ public class AnalyticsService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AppointmentsByStatusDTO> getAppointmentsByStatus(LocalDate from, LocalDate to) {
         List<Object[]> results = appointmentRepository.countAppointmentsByStatus(from, to);
 
@@ -43,6 +46,7 @@ public class AnalyticsService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<TopDoctorDTO> getTopDoctors(LocalDate from, LocalDate to) {
         List<Object[]> results = appointmentRepository.findTopDoctorsByAppointments(from, to);
 

@@ -55,10 +55,12 @@ public class AppointmentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "date") String sort,
-            @RequestParam(defaultValue = "desc") String direction
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search
     ) {
         return ResponseEntity.ok(
-                appointmentService.getAllAppointmentsPaged(page, size, sort, direction)
+                appointmentService.getAppointmentsPaged(page, size, sort, direction, status, search)
         );
     }
 

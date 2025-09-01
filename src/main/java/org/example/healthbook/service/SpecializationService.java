@@ -4,6 +4,7 @@ import org.example.healthbook.dto.SpecializationDTO;
 import org.example.healthbook.model.Specialization;
 import org.example.healthbook.repository.SpecializationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,21 +19,25 @@ public class SpecializationService {
         this.specializationRepository = specializationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<SpecializationDTO> getAll() {
         return specializationRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<SpecializationDTO> findById(Long id) {
         return specializationRepository.findById(id)
                 .map(this::convertToDTO);
     }
 
+    @Transactional
     public Specialization save(Specialization specialization) {
         return specializationRepository.save(specialization);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         specializationRepository.deleteById(id);
     }

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @Entity
@@ -21,10 +23,19 @@ public class Patient {
     @Column(nullable = false)
     private String phone;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    @OneToMany(mappedBy = "patient")
+    private List<Appointment> appointments;
+
+    @OneToMany(mappedBy = "patient")
+    private List<MedicalRecord> medicalRecords;
+
+    @OneToMany(mappedBy = "patient")
+    private List<AppointmentRequest> appointmentRequests;
 
     public Long getUserId() {
         return user != null ? user.getId() : null;

@@ -11,6 +11,7 @@ import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.repository.SpecializationRepository;
 import org.example.healthbook.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -33,6 +34,7 @@ public class DoctorService {
         this.specializationRepository = specializationRepository;
     }
 
+    @Transactional
     public Doctor createDoctorFromDTO(DoctorCreateDTO dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено: " + dto.getUsername()));
@@ -52,21 +54,25 @@ public class DoctorService {
         return doctorRepository.save(doctor);
     }
 
+    @Transactional(readOnly = true)
     public List<DoctorDTO> getAllDoctors() {
         return doctorRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public DoctorDTO getDoctorById(Long id) {
         Doctor doctor = getDoctorByIdEntity(id);
         return convertToDTO(doctor);
     }
 
+    @Transactional
     public Doctor createDoctor(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
 
+    @Transactional
     public Doctor updateDoctor(Long id, Doctor doctorDetails) {
         Doctor doctor = getDoctorByIdEntity(id);
 
@@ -82,10 +88,12 @@ public class DoctorService {
         return doctorRepository.save(doctor);
     }
 
+    @Transactional
     public void deleteDoctor(Long id) {
         doctorRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public DoctorDTO findByUsername(String username) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isEmpty()) return null;
@@ -94,6 +102,7 @@ public class DoctorService {
         return doctorOpt.map(this::convertToDTO).orElse(null);
     }
 
+    @Transactional
     public void updateByUsername(String username, DoctorDTO dto) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));

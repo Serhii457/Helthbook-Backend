@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -36,8 +38,10 @@ public class AppointmentRequest {
     @ToString.Exclude
     private Doctor doctor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @ToString.Exclude
+    @JoinColumn(name = "patient_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Patient patient;
 
     @OneToOne(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true)

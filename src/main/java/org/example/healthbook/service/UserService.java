@@ -1,5 +1,6 @@
 package org.example.healthbook.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.example.healthbook.model.Doctor;
 import org.example.healthbook.model.Role;
 import org.example.healthbook.model.Specialization;
@@ -35,6 +36,7 @@ public class UserService {
         this.specializationRepository = specializationRepository;
     }
 
+    @Transactional
     public User registerPatient(String username, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Пользователь уже существует");
@@ -51,7 +53,8 @@ public class UserService {
         return userRepository.save(user);
     }
 
-public User registerDoctor(String username, String password, String fullName, String phone, Long specializationId) {
+    @Transactional
+    public User registerDoctor(String username, String password, String fullName, String phone, Long specializationId) {
     if (userRepository.findByUsername(username).isPresent()) {
         throw new RuntimeException("Користувач вже існує");
     }
@@ -82,7 +85,8 @@ public User registerDoctor(String username, String password, String fullName, St
     return savedUser;
 }
 
-public Optional<User> findByUsername(String username) {
+    @Transactional(readOnly = true)
+    public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 }

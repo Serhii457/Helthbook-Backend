@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -32,9 +34,10 @@ public class MedicalRecord {
     @JoinColumn(name = "appointment_id")
     private Appointment appointment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @ToString.Exclude
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Patient patient;
 
     @ManyToOne

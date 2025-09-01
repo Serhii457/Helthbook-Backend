@@ -12,7 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
@@ -22,7 +22,6 @@ import java.util.Set;
 public class AppointmentRequestService {
 
     private final AppointmentRequestRepository requestRepository;
-    private final AppointmentRepository appointmentRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
@@ -69,6 +68,7 @@ public class AppointmentRequestService {
         return requestRepository.save(request);
     }
 
+    @Transactional(readOnly = true)
     public Page<AppointmentRequestDTO> getRequestsForDoctor(String username, int page, int size, String sort) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -121,5 +121,4 @@ public class AppointmentRequestService {
 
         return requestRepository.save(request);
     }
-
 }

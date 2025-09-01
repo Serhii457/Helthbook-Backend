@@ -1,6 +1,7 @@
 package org.example.healthbook.repository;
 
 import org.example.healthbook.model.Appointment;
+import org.example.healthbook.model.AppointmentStatus;
 import org.example.healthbook.model.Doctor;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -45,5 +46,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "GROUP BY a.doctor.user.fullName " +
             "ORDER BY COUNT(a) DESC")
     List<Object[]> findTopDoctorsByAppointments(@Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("""
+    SELECT a FROM Appointment a
+    WHERE (:status IS NULL OR a.status = :status)
+      AND (
+        :search IS NULL OR LOWER(a.patient.fullName) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(a.doctor.user.fullName) LIKE LOWER(CONCAT('%', :search, '%'))
+      )
+""")
+    @EntityGraph(attributePaths = {"doctor", "patient"})
+    Page<Appointment> findFilteredAppointments(
+            @Param("status") AppointmentStatus status,
+            @Param("search") String search,
+            Pageable pageable
+    );
 
 }

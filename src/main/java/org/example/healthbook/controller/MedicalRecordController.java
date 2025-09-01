@@ -7,6 +7,8 @@ import org.example.healthbook.service.MedicalRecordService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -79,4 +81,16 @@ public class MedicalRecordController {
 
         return ResponseEntity.ok(recordsPage);
     }
+
+    @GetMapping("/export/{appointmentId}")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
+    public ResponseEntity<byte[]> exportRecordToPdf(@PathVariable Long appointmentId) {
+        byte[] pdfBytes = medicalRecordService.exportMedicalRecordToPdf(appointmentId);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=medical_record_" + appointmentId + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+
 }

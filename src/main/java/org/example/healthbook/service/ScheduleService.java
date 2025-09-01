@@ -7,6 +7,7 @@ import org.example.healthbook.repository.DoctorRepository;
 import org.example.healthbook.repository.ScheduleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalTime;
@@ -26,17 +27,20 @@ public class ScheduleService {
         this.doctorRepository = doctorRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ScheduleDTO> getAllSchedules() {
         return scheduleRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<ScheduleDTO> findById(Long id) {
         return scheduleRepository.findById(id)
                 .map(this::convertToDTO);
     }
 
+    @Transactional
     public ScheduleDTO addSlot(ScheduleDTO dto) {
         LocalTime time = LocalTime.parse(dto.getStartTime());
 
@@ -58,10 +62,12 @@ public class ScheduleService {
         return convertToDTO(scheduleRepository.save(schedule));
     }
 
+    @Transactional
     public void deleteById(Long id) {
         scheduleRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public ScheduleDTO convertToDTO(Schedule schedule) {
         ScheduleDTO dto = new ScheduleDTO();
         dto.setId(schedule.getId());
@@ -72,10 +78,10 @@ public class ScheduleService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public List<ScheduleDTO> getScheduleForDoctor(Long doctorId) {
         return scheduleRepository.findByDoctorId(doctorId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
 }

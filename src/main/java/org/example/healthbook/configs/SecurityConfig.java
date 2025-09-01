@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessHandler((request, response, auth) -> {
                             if (auth != null) {
-                                request.getSession().invalidate(); // ← уничтожаем сессию
+                                request.getSession().invalidate();
                             }
                             response.setStatus(200);
                         })
